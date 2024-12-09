@@ -7,19 +7,58 @@ import matplotlib.pyplot as plt
 import plotly.subplots as sp
 import plotly.express as px
 import io
+import requests
+from api import add_car
+
 st.title("DATA analysis project")
 st.title("Creator : Sergeev Nikita 241-1")
+
+api_url = "http://127.0.0.1:8000"
 data = pd.read_csv("car_data.csv")
+
+st.header("Поиск машин")
+brand = st.text_input("Марка машины:")
+min_hp = st.number_input("Минимальная мощность (л.с.):", value=0)
+max_hp = st.number_input("Максимальная мощность (л.с.):", value=500)
+limit = st.number_input("Сколько объявлений показать", value=100, min_value=1)
+
+
+if st.button("Get data about cars"):
+    params = {"brand": brand,"min_hp": min_hp, "max_hp": max_hp, "limit": limit}
+    response = requests.get(f"{api_url}/cars/", params=params)
+    if response.status_code == 200:
+        st.table(response.json())
+    else:
+        st.error(f"Ошибка: {response.json()['detail']}")
+
+st.header("Add new car")
+new_car = {
+    "car_brand": st.text_input("Марка машины:", key="car_brand"),
+    "car_model": st.text_input("Модель машины:", key="car_model"),
+    "car_price": st.number_input("Цена:", value=0),
+    "car_age": st.number_input("Возраст машины:", value=0),
+    "car_mileage": st.number_input("Пробег:", value=0),
+    "car_engine_hp": st.number_input("Мощность двигателя (л.с.):", value=0),
+    "car_fuel": st.text_input("Тип топлива:", key="car_fuel"),
+    "car_transmission": st.text_input("Тип коробки передач:", key="car_transmission"),
+    "car_country": st.text_input("Страна производства:", key="car_country"),
+}
+
+if st.button("Добавить машину"):
+    response = add_car(new_car)
+    st.success(response["message"])
+    st.write("Добавленная машина:")
+    st.table(pd.DataFrame([response["car"]]))
+
+    st.write("Обновленные данные:")
+    st.table(data.tail(10))
+
 st.table(data.head(10))
 buffer = io.StringIO()
 data.info(buf=buffer)
 st.text(buffer.getvalue())
 st.write("Все заголовки столбцов:")
 st.table(data.columns)
-st.write("Так как поле Unnamed: 0 ни за что не отвечает лучше его удалить, остальные загаловки записанны коректно, а это значит, что они не будут затруднять работу с данными.")
-del data['Unnamed: 0']
-st.write("Проверим все ли удалилось корректно.")
-st.table(data.head(10))
 
 st.write("Проверим данные на наличие пропусков вызовом набора методов для суммирования пропущенных значений.")
 st.table(data.isnull().sum())
