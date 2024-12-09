@@ -5,7 +5,6 @@ app = FastAPI()
 
 data = pd.read_csv("car_data.csv")
 
-# Добавляем новые столбцы
 data['price_per_hp'] = data['car_price'] / data['car_engine_hp']
 data['age_to_mileage_ratio'] = data['car_age'] / data['car_mileage']
 
@@ -56,4 +55,3 @@ def add_car(car: dict):
         }
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error adding car: {e}")
-
