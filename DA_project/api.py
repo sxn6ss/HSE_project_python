@@ -8,9 +8,6 @@ data = pd.read_csv("car_data.csv")
 data['price_per_hp'] = data['car_price'] / data['car_engine_hp']
 data['age_to_mileage_ratio'] = data['car_age'] / data['car_mileage']
 
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to the Car Dataset API!"}
 
 @app.get("/cars/")
 def get_cars(brand: str = None, min_hp: float = None, max_hp: float = None, limit: int = None):
